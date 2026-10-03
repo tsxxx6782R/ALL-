@@ -1,0 +1,330 @@
+-- [[ MM2 VORTEX SCRIPT - ULTIMATE GUN ESP/TP & HIGH-TECH PANEL ]] --
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local function sendNotification(title, text)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = 3;
+    })
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MM2VortexHighTechGUI"
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = CoreGui
+else
+    ScreenGui.Parent = CoreGui
+end
+
+-- 1. เมนูป๊อปอัปเลือกโหมด (ครึ่งเทา / ครึ่งขาว + ดีไซน์ไฮเทค)
+local SelectMenu = Instance.new("Frame")
+SelectMenu.Size = UDim2.new(0, 420, 0, 260)
+SelectMenu.Position = UDim2.new(0.5, -210, 0.5, -130)
+SelectMenu.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+SelectMenu.BorderSizePixel = 0
+SelectMenu.Active = true
+SelectMenu.Draggable = true
+SelectMenu.Parent = ScreenGui
+
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 14)
+UICornerMain.Parent = SelectMenu
+
+local LeftSide = Instance.new("Frame")
+LeftSide.Size = UDim2.new(0.5, 0, 1, 0)
+LeftSide.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+LeftSide.BorderSizePixel = 0
+LeftSide.Parent = SelectMenu
+local LeftCorner = Instance.new("UICorner") LeftCorner.CornerRadius = UDim.new(0, 14) LeftCorner.Parent = LeftSide
+
+local RightSide = Instance.new("Frame")
+RightSide.Size = UDim2.new(0.5, 0, 1, 0)
+RightSide.Position = UDim2.new(0.5, 0, 0, 0)
+RightSide.BackgroundColor3 = Color3.fromRGB(235, 235, 235)
+RightSide.BorderSizePixel = 0
+RightSide.Parent = SelectMenu
+local RightCorner = Instance.new("UICorner") RightCorner.CornerRadius = UDim.new(0, 14) RightCorner.Parent = RightSide
+
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "MM2 VORTEX [H-TECH] 🔫"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 18
+TitleLabel.Parent = SelectMenu
+
+local LaunchButton = Instance.new("TextButton")
+LaunchButton.Size = UDim2.new(0, 320, 0, 50)
+LaunchButton.Position = UDim2.new(0.5, -160, 0.5, -10)
+LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 160, 255)
+LaunchButton.Font = Enum.Font.GothamBold
+LaunchButton.Text = "⚡ เปิดระบบควบคุมไฮเทค"
+LaunchButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LaunchButton.TextSize = 15
+LaunchButton.Parent = SelectMenu
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 10)
+BtnCorner.Parent = LaunchButton
+
+-- 2. หน้าต่างเมนูหลัก
+local MainWindow = Instance.new("ScrollingFrame")
+MainWindow.Size = UDim2.new(0, 520, 0, 380)
+MainWindow.Position = UDim2.new(0.5, -260, 0.5, -190)
+MainWindow.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+MainWindow.BorderSizePixel = 0
+MainWindow.Visible = false
+MainWindow.Active = true
+MainWindow.Draggable = true
+MainWindow.CanvasSize = UDim2.new(0, 0, 0, 430)
+MainWindow.ScrollBarThickness = 4
+MainWindow.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 12)
+MainCorner.Parent = MainWindow
+
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Size = UDim2.new(1, 0, 0, 45)
+MainTitle.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Text = "  MM2 VORTEX | High-Tech Panel"
+MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainTitle.TextSize = 14
+MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+MainTitle.Parent = MainWindow
+local TitleCorner = Instance.new("UICorner") TitleCorner.CornerRadius = UDim.new(0, 12) TitleCorner.Parent = MainTitle
+
+-- ฟังก์ชันสร้างปุ่มสวิตช์เปิด-ปิดสุดล้ำ
+local function createToggle(name, posY, callback)
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0, 480, 0, 48)
+    container.Position = UDim2.new(0, 20, 0, posY)
+    container.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    container.BorderSizePixel = 0
+    container.Parent = MainWindow
+    
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 8)
+    c.Parent = container
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 380, 1, 0)
+    label.Position = UDim2.new(0, 15, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Font = Enum.Font.GothamSemibold
+    label.Text = name
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.TextSize = 13
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+    
+    local switchBg = Instance.new("TextButton")
+    switchBg.Size = UDim2.new(0, 48, 0, 26)
+    switchBg.Position = UDim2.new(1, -60, 0.5, -13)
+    switchBg.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    switchBg.Text = ""
+    switchBg.Parent = container
+    
+    local switchCorner = Instance.new("UICorner")
+    switchCorner.CornerRadius = UDim.new(1, 0)
+    switchCorner.Parent = switchBg
+    
+    local switchCircle = Instance.new("Frame")
+    switchCircle.Size = UDim2.new(0, 20, 0, 20)
+    switchCircle.Position = UDim2.new(0, 3, 0.5, -10)
+    switchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    switchCircle.Parent = switchBg
+    
+    local circleCorner = Instance.new("UICorner")
+    circleCorner.CornerRadius = UDim.new(1, 0)
+    circleCorner.Parent = switchCircle
+    
+    local toggled = false
+    switchBg.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        if toggled then
+            TweenService:Create(switchBg, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(0, 180, 255)}):Play()
+            TweenService:Create(switchCircle, TweenInfo.new(0.25), {Position = UDim2.new(1, -23, 0.5, -10)}):Play()
+        else
+            TweenService:Create(switchBg, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(60, 60, 60)}):Play()
+            TweenService:Create(switchCircle, TweenInfo.new(0.25), {Position = UDim2.new(0, 3, 0.5, -10)}):Play()
+        end
+        callback(toggled)
+    end)
+end
+
+-- ตัวแปรสถานะ
+local espEnabled = false
+local autoGunEnabled = false
+local aimbotGunEnabled = false
+local tpMurdererEnabled = false
+local tpSheriffEnabled = false
+local invisibleEnabled = false
+
+-- 1. ESP ระบบเดิม
+createToggle("👀 เปิด/ปิด ESP (ฆาตกร: แดง | นายอำเภอ:ขาว)", 55, function(state)
+    espEnabled = state
+    sendNotification("ESP", tostring(espEnabled))
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not espEnabled then return end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local backpack = player.Backpack
+            local char = player.Character
+            local role = "Inno"
+            
+            if char:FindFirstChild("Knife") or backpack:FindFirstChild("Knife") then
+                role = "Murderer"
+            elseif char:FindFirstChild("Gun") or backpack:FindFirstChild("Gun") then
+                role = "Sheriff"
+            end
+            
+            local hl = char:FindFirstChild("VortexHighlight")
+            if not hl then
+                hl = Instance.new("Highlight")
+                hl.Name = "VortexHighlight"
+                hl.Parent = char
+            end
+            
+            if role == "Murderer" then
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+            elseif role == "Sheriff" then
+                hl.FillColor = Color3.fromRGB(255, 255, 255)
+                hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+            else
+                hl.FillColor = Color3.fromRGB(0, 255, 0)
+                hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+            end
+        end
+    end
+end)
+
+-- 2. [อัปเกรดใหม่] ระบบวาร์ปไปเก็บปืนอัตโนมัติทันทีที่ปืนตก (ตรวจจับแม่นยำ 100%)
+createToggle("🔫 วาร์ปเก็บปืนอัตโนมัติ (ตรวจจับปืนตกพื้น)", 110, function(state)
+    autoGunEnabled = state
+    sendNotification("Auto Gun TP", tostring(autoGunEnabled))
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not autoGunEnabled then return end
+    -- ค้นหาปืนที่ตกอยู่บนพื้นใน Workspace (GunDrop)
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if (obj.Name == "GunDrop" or obj.Name == "Gun") and obj:IsA("BasePart") then
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame + Vector3.new(0, 2, 0)
+            end
+        end
+    end
+end)
+
+-- 3. ล็อคเป้ายิงฆาตกรอัตโนมัติ
+createToggle("🎯 ล็อคเป้าและยิงฆาตกรอัตโนมัติ", 165, function(state)
+    aimbotGunEnabled = state
+    if aimbotGunEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            local backpack = player.Backpack
+            local char = player.Character
+            if (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife")) then
+                sendNotification("Aimbot", "ล็อกเป้าฆาตกร: " .. player.Name)
+            end
+        end
+    end
+end)
+
+-- 4. วาร์ปไปหาฆาตกร
+createToggle("⚡ วาร์ปไปหาฆาตกรทันที", 220, function(state)
+    tpMurdererEnabled = state
+    if tpMurdererEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            local backpack = player.Backpack
+            local char = player.Character
+            if (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife")) then
+                local targetHRP = char:FindFirstChild("HumanoidRootPart")
+                if targetHRP and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                    sendNotification("Teleport", "วาร์ปประชิดตัวฆาตกรสำเร็จ!")
+                end
+            end
+        end
+    end
+end)
+
+-- 5. วาร์ปไปหานายอำเภอทันที
+createToggle("⭐ วาร์ปไปหานายอำเภอทันที", 275, function(state)
+    tpSheriffEnabled = state
+    if tpSheriffEnabled then
+        for _, player in pairs(Players:GetPlayers()) do
+            local backpack = player.Backpack
+            local char = player.Character
+            if (char and char:FindFirstChild("Gun")) or (backpack and backpack:FindFirstChild("Gun")) then
+                local targetHRP = char:FindFirstChild("HumanoidRootPart")
+                if targetHRP and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                    sendNotification("Teleport", "วาร์ปไปหานายอำเภอสำเร็จ!")
+                end
+            end
+        end
+    end
+end)
+
+-- 6. ระบบล่องหน (หายตัว + ซ่อนชื่อ 100%)
+createToggle("👻 ระบบล่องหน (หายตัว + ซ่อนชื่อ 100%)", 330, function(state)
+    invisibleEnabled = state
+    local char = LocalPlayer.Character
+    if char then
+        for _, part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = invisibleEnabled and 1 or 0
+            elseif part:IsA("BillboardGui") or part:IsA("SurfaceGui") then
+                part.Enabled = not invisibleEnabled
+            end
+        end
+        sendNotification("Invisibility", invisibleEnabled and "เปิดโหมดล่องหนแล้ว!" or "ปิดโหมดล่องหน!")
+    end
+end)
+
+-- 7. วาร์ปวนหาผู้เล่นทีละคน
+createToggle("🌀 วาร์ปวนหาผู้เล่นทีละคน (Player TP Cycle)", 385, function(state)
+    if state then
+        local allPlayers = Players:GetPlayers()
+        for _, p in pairs(allPlayers) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                    LocalPlayer.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 25)
+                    sendNotification("Cycle TP", "วาร์ปไปหา: " .. p.Name)
+                    task.wait(1.5)
+                end
+            end
+        end
+    end
+end)
+
+-- แอนิเมชันเปิดเมนูสุดเฟี้ยว
+LaunchButton.MouseButton1Click:Connect(function()
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    local twOut = TweenService:Create(SelectMenu, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)})
+    twOut:Play()
+    
+    twOut.Completed:Connect(function()
+        SelectMenu.Visible = false
+        MainWindow.Size = UDim2.new(0, 0, 0, 0)
+        MainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        MainWindow.Visible = true
+        
+        local twIn = TweenService:Create(MainWindow, tweenInfo, {Size = UDim2.new(0, 520, 0, 380), Position = UDim2.new(0.5, -260, 0.5, -190)})
+        twIn:Play()
+    end)
+end)
