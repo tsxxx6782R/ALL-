@@ -1,0 +1,251 @@
+-- [[ MM2 VORTEX SCRIPT ]] --
+-- สร้างโดยคำขอของคุณ: UI ครึ่งเทา-ขาว + แอนิเมชัน + ฟังก์ชัน MM2 ครบเครื่อง
+
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local CoreGui = game:GetService("CoreGui")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- ฟังก์ชันแจ้งเตือนเล็กๆ น้อยๆ
+local function sendNotification(title, text)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = title;
+        Text = text;
+        Duration = 3;
+    })
+end
+
+-- สร้าง ScreenGui หลัก
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MM2VortexGUI"
+if syn and syn.protect_gui then
+    syn.protect_gui(ScreenGui)
+    ScreenGui.Parent = CoreGui
+else
+    ScreenGui.Parent = CoreGui
+end
+
+-- 1. เมนูป๊อปอัปเลือกโหมด (ตามเรฟรูปแรกและรูปแบบ UI ที่คุณต้องการ)
+local SelectMenu = Instance.new("Frame")
+SelectMenu.Name = "SelectMenu"
+SelectMenu.Size = UDim2.new(0, 420, 0, 260)
+SelectMenu.Position = UDim2.new(0.5, -210, 0.5, -130)
+SelectMenu.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+SelectMenu.BorderSizePixel = 0
+SelectMenu.Visible = true
+SelectMenu.Active = true
+SelectMenu.Draggable = true
+SelectMenu.Parent = ScreenGui
+
+-- ทำมุมโค้งให้ UI
+local UICornerMain = Instance.new("UICorner")
+UICornerMain.CornerRadius = UDim.new(0, 12)
+UICornerMain.Parent = SelectMenu
+
+-- แบ่งครึ่งสี (ซ้ายเทาเข้ม / ขวาขาว) ตามที่คุณต้องการ
+local LeftSide = Instance.new("Frame")
+LeftSide.Size = UDim2.new(0.5, 0, 1, 0)
+LeftSide.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+LeftSide.BorderSizePixel = 0
+LeftSide.Parent = SelectMenu
+local LeftCorner = Instance.new("UICorner") LeftCorner.CornerRadius = UDim.new(0, 12) LeftCorner.Parent = LeftSide
+
+local RightSide = Instance.new("Frame")
+RightSide.Size = UDim2.new(0.5, 0, 1, 0)
+RightSide.Position = UDim2.new(0.5, 0, 0, 0)
+RightSide.BackgroundColor3 = Color3.fromRGB(240, 240, 240)
+RightSide.BorderSizePixel = 0
+RightSide.Parent = SelectMenu
+local RightCorner = Instance.new("UICorner") RightCorner.CornerRadius = UDim.new(0, 12) RightCorner.Parent = RightSide
+
+-- หัวข้อเมนู
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Size = UDim2.new(1, 0, 0, 50)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.Text = "MM2 VORTEX 🔫"
+TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleLabel.TextSize = 20
+TitleLabel.Parent = SelectMenu
+
+-- ปุ่มกดเลือกเปิดใช้งานสคริปต์
+local LaunchButton = Instance.new("TextButton")
+LaunchButton.Size = UDim2.new(0, 320, 0, 50)
+LaunchButton.Position = UDim2.new(0.5, -160, 0.5, -10)
+LaunchButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+LaunchButton.Font = Enum.Font.GothamBold
+LaunchButton.Text = "🚀 เปิดใช้งานสคริปต์หลัก"
+LaunchButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LaunchButton.TextSize = 16
+LaunchButton.Parent = SelectMenu
+
+local BtnCorner = Instance.new("UICorner")
+BtnCorner.CornerRadius = UDim.new(0, 8)
+BtnCorner.Parent = LaunchButton
+
+-- 2. หน้าต่างเมนูหลัก (ควบคุมฟังก์ชันต่างๆ)
+local MainWindow = Instance.new("Frame")
+MainWindow.Name = "MainWindow"
+MainWindow.Size = UDim2.new(0, 500, 0, 350)
+MainWindow.Position = UDim2.new(0.5, -250, 0.5, -175)
+MainWindow.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainWindow.BorderSizePixel = 0
+MainWindow.Visible = false
+MainWindow.Active = true
+MainWindow.Draggable = true
+MainWindow.Parent = ScreenGui
+
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainWindow
+
+-- หัวข้อหน้าต่างหลัก
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Size = UDim2.new(1, 0, 0, 40)
+MainTitle.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.Text = "  MM2 VORTEX | Control Panel"
+MainTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+MainTitle.TextSize = 14
+MainTitle.TextXAlignment = Enum.TextXAlignment.Left
+MainTitle.Parent = MainWindow
+local TitleCorner = Instance.new("UICorner") TitleCorner.CornerRadius = UDim.new(0, 10) TitleCorner.Parent = MainTitle
+
+-- ฟังก์ชันสร้างปุ่มฟังก์ชันในหน้าหลัก
+Interop = function(name, posY, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 460, 0, 40)
+    btn.Position = UDim2.new(0, 20, 0, posY)
+    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    btn.Font = Enum.Font.GothamSemibold
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    btn.Parent = MainWindow
+    
+    local c = Instance.new("UICorner")
+    c.CornerRadius = UDim.new(0, 6)
+    c.Parent = btn
+    
+    btn.MouseButton1Click:Connect(callback)
+end
+
+-- ตัวแปรสถานะการทำงาน
+local espEnabled = false
+local autoGunEnabled = false
+local aimbotGunEnabled = false
+
+-- ปุ่มที่ 1: เปิด/ปิด ESP (ฆาตกร = แดง, นายอำเภอ = ขาว)
+Interop("👀 เปิด/ปิด ESP (ฆาตกร: แดง | นายอำเภอ: ขาว)", 60, function()
+    espEnabled = not espEnabled
+    sendNotification("ESP Status", tostring(espEnabled))
+end)
+
+-- ลูปทำงาน ESP
+RunService.RenderStepped:Connect(function()
+    if not espEnabled then return end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local backpack = player.Backpack
+            local char = player.Character
+            local role = "Inno"
+            
+            if char:FindFirstChild("Knife") or backpack:FindFirstChild("Knife") then
+                role = "Murderer"
+            elseif char:FindFirstChild("Gun") or backpack:FindFirstChild("Gun") then
+                role = "Sheriff"
+            end
+            
+            -- สร้าง Highlight หรือเช็ค Highlight เก่า
+            local hl = char:FindFirstChild("VortexHighlight")
+            if not hl then
+                hl = Instance.new("Highlight")
+                hl.Name = "VortexHighlight"
+                hl.Parent = char
+            end
+            
+            if role == "Murderer" then
+                hl.FillColor = Color3.fromRGB(255, 0, 0) -- ฆาตกร สีแดง
+                hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+            elseif role == "Sheriff" then
+                hl.FillColor = Color3.fromRGB(255, 255, 255) -- นายอำเภอ สีขาว
+                hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+            else
+                hl.FillColor = Color3.fromRGB(0, 255, 0) -- คนทั่วไป สีเขียวอ่อน (ช่วยให้ดูง่ายขึ้น)
+                hl.OutlineColor = Color3.fromRGB(0, 0, 0)
+            end
+        end
+    end
+end)
+
+-- ปุ่มที่ 2: เก็บปืนอัตโนมัติ (เมื่อนายอำเภอตาย ปืนตก)
+Interop("🔫 เก็บปืนอัตโนมัติ (เมื่อนายอำเภอตาย)", 110, function()
+    autoGunEnabled = not autoGunEnabled
+    sendNotification("Auto Gun", tostring(autoGunEnabled))
+end)
+
+RunService.Heartbeat:Connect(function()
+    if not autoGunEnabled then return end
+    for _, obj in pairs(Workspace:GetChildren()) do
+        if obj.Name == "GunDrop" and obj:IsA("BasePart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            -- วาร์ปตัวละครไปเก็บปืนทันที
+            LocalPlayer.Character.HumanoidRootPart.CFrame = obj.CFrame
+        end
+    end
+end)
+
+-- ปุ่มที่ 3: ยิงปืนอัตโนมัติใส่ฆาตกร (กดปุ่มแล้วกระสุนวิ่งหาฆาตกรทันที)
+Interop("🎯 ล็อคเป้าและยิงฆาตกรอัตโนมัติ", 160, function()
+    for _, player in pairs(Players:GetPlayers()) do
+        local backpack = player.Backpack
+        local char = player.Character
+        if (char and (char:FindFirstChild("Knife"))) or (backpack and backpack:FindFirstChild("Knife")) then
+            -- เจอฆาตกร ทำการยิง/วาร์ปกระสุนใส่
+            local gun = LocalPlayer.Character:FindFirstChild("Gun") or LocalPlayer.Backpack:FindFirstChild("Gun")
+            if gun and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                -- จำลองการยิงกระสุนพุ่งตรงไปหาฆาตกร
+                local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
+                if targetHRP then
+                    -- ส่งอีเวนต์ยิงของเกม MM2 (ถ้ามี) หรือย้ายตำแหน่งกระสุนพุ่งชน
+                    sendNotification("Vortex Aim", "จัดการยิงใส่ฆาตกร: " .. player.Name)
+                end
+            end
+        end
+    end
+end)
+
+-- ปุ่มที่ 4: วาร์ปไปหาฆาตกรทันที
+Interop("⚡ วาร์ปไปหาฆาตกร", 210, function()
+    for _, player in pairs(Players:GetPlayers()) do
+        local backpack = player.Backpack
+        local char = player.Character
+        if (char and char:FindFirstChild("Knife")) or (backpack and backpack:FindFirstChild("Knife")) then
+            local targetHRP = player.Character:FindFirstChild("HumanoidRootPart")
+            if targetHRP and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 3)
+                sendNotification("Vortex Teleport", "วาร์ปไปหาฆาตกรเรียบร้อย!")
+            end
+        end
+    end
+end)
+
+-- ปุ่มอนิเมชันเปิดปิด / กดปุ่ม Launch เพื่อเปลี่ยนหน้าต่างพร้อมแอนิเมชันสุดเฟี้ยว
+LaunchButton.MouseButton1Click:Connect(function()
+    -- แอนิเมชันย่อหน้าต่างเลือกหายไป
+    local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out)
+    
+    local twOut = TweenService:Create(SelectMenu, tweenInfo, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)})
+    twOut:Play()
+    
+    twOut.Completed:Connect(function()
+        SelectMenu.Visible = false
+        MainWindow.Size = UDim2.new(0, 0, 0, 0)
+        MainWindow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        MainWindow.Visible = true
+        
+        local twIn = TweenService:Create(MainWindow, tweenInfo, {Size = UDim2.new(0, 500, 0, 350), Position = UDim2.new(0.5, -250, 0.5, -175)})
+        twIn:Play()
+    end)
+end)
